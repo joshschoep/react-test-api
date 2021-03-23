@@ -7,6 +7,7 @@ use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class CommentController extends Controller
 {
@@ -61,7 +62,7 @@ class CommentController extends Controller
      */
     public function update(Request $request, Comment $comment)
     {
-        if(Auth::id() != $comment->owner_id){
+        if(!Gate::allows('modify-content', $comment)){
             return response()->view('no-permissions', [], 403);
         }
         $validated = $request->validate(['content' => 'required']);
@@ -77,7 +78,7 @@ class CommentController extends Controller
      */
     public function destroy(Request $request, Comment $comment)
     {
-        if(Auth::id() != $comment->owner_id){
+        if(!Gate::allows('modify-content', $post)){
             return response()->view('no-permissions', [], 403);
         }
         $comment->delete();

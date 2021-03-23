@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -51,7 +52,7 @@ class BlogPostController extends Controller
 
     public function edit(Request $request, BlogPost $post)
     {
-        if(Auth::id() != $post->owner_id){
+        if(!Gate::allows('modify-content', $post)) {
             return response()->view('no-permissions', [], 403);
         }
         return view('blog-posts.edit', compact('post', 'request'));
@@ -59,7 +60,7 @@ class BlogPostController extends Controller
 
     public function update(Request $request, BlogPost $post)
     {
-        if(Auth::id() != $post->owner_id){
+        if(!Gate::allows('modify-content', $post)) {
             return response()->view('no-permissions', [], 403);
         }
         $validated = $request->validate(BlogPostController::$POST_FIELD_VALIDATIONS);
@@ -69,7 +70,7 @@ class BlogPostController extends Controller
     }
 
     public function destroy(BlogPost $post){
-        if(Auth::id() != $post->owner_id){
+        if(!Gate::allows('modify-content', $post)) {
             return response()->view('no-permissions', [], 403);
         }
         $post->delete();
