@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BlogPostController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -30,11 +31,23 @@ Route::group(['prefix' => 'posts', 'middleware' => 'auth'], function () {
 
     Route::put('{post}', [BlogPostController::class, 'update']);
 
+    Route::delete('{post}', [BlogPostController::class, 'destroy']);
+
     Route::get('', [BlogPostController::class, 'index'])->withoutMiddleware('auth');
 
     Route::post('', [BlogPostController::class, 'store']);
 
 });
+
+Route::post('posts/{post}/comments', [CommentController::class, 'store']);
+
+Route::get('comments/{comment}/edit', [CommentController::class, 'edit']);
+
+Route::get('comments/{comment}', [CommentController::class, 'show']);
+
+Route::put('comments/{comment}', [CommentController::class, 'update']);
+
+Route::delete('comments/{comment}', [CommentController::class, 'destroy']);
 
 Auth::routes();
 

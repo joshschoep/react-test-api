@@ -3,11 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
-use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class BlogPostController extends Controller
 {
+    protected static $POST_FIELD_VALIDATIONS = [
+        'title' => ['required', 'max:255'],
+        'content' => ['required'],
+    ];
+
+
     public function root()
     {
         if(Auth::check()){
@@ -19,42 +26,53 @@ class BlogPostController extends Controller
 
     public function index()
     {
-        $posts = BlogPost::orderByDesc('updated_at')->paginate(20);
-        foreach($posts as $post){
-            $post->owner_name = User::where('id', $post->owner_id)
-                ->first()
-                ->name;
-        }
+        $posts = BlogPost::orderByDesc('updated_at')->paginate(15);
         return view('blog-posts.index', compact('posts'));
     }
 
-    public function show(BlogPost $post)
+    public function show(Request $request, BlogPost $post)
     {
-        $owner = User::find($post->owner_id);
-        return view('blog-posts.show', compact('post', 'owner'));
+        return view('blog-posts.show', compact('request', 'post'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return view('blog-posts.create');
+        return view('blog-posts.create', compact('request'));
     }
 
-    public function store(BlogPost $post)
+    public function store(Request $request)
     {
-        return 'store works!';
+        $validated = $request->validate(BlogPostController::$POST_FIELD_VALIDATIONS);
+        $validated['owner_id'] = Auth::id();
+        $validated['lead'] = Str::limit($validated['content'], 200, $end='...');
+        $new_post = BlogPost::create($validated);
+        return redirect('/posts/' . $new_post->id);
     }
 
-    public function edit(BlogPost $post)
+    public function edit(Request $request, BlogPost $post)
     {
         if(Auth::id() != $post->owner_id){
-            return view('blog-posts.edit', compact('post'));
-        }else{
-            return "woohoo";
+            return response()->view('no-permissions', [], 403);
         }
+        return view('blog-posts.edit', compact('post', 'request'));
     }
 
-    public function update(BlogPost $post)
+    public function update(Request $request, BlogPost $post)
     {
-        return 'update works';
+        if(Auth::id() != $post->owner_id){
+            return response()->view('no-permissions', [], 403);
+        }
+        $validated = $request->validate(BlogPostController::$POST_FIELD_VALIDATIONS);
+        $validated['lead'] = Str::limit($validated['content'], 200, $end='...');
+        $post->update($validated);
+        return redirect('/posts/' . $post->id);
+    }
+
+    public function destroy(BlogPost $post){
+        if(Auth::id() != $post->owner_id){
+            return response()->view('no-permissions', [], 403);
+        }
+        $post->delete();
+        return redirect('/recent');
     }
 }

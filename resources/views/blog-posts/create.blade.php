@@ -17,22 +17,24 @@
                 form-control 
                 @error('title') border-danger @enderror
             " 
-            name="title">
+            name="title"
+            value="{{ $request->old('title') }}">
         @error('title')
-            <p class="text-danger">{{ message }}</p>
+            <p class="text-danger">{{ $message }}</p>
         @enderror
     </section>
     <section class="form-group grow-section">
         <label for="content" hidden>Post Content</label>
+        @error('content')
+            <p class="text-danger">The content field is required</p>
+        @enderror
         <textarea name="content"
             class="
                 form-control
                 @error('content') border-danger @enderror
             "
-        ></textarea>
-        @error('content')
-            <p class="text-danger">{{ message }}</p>
-        @enderror
+            placeholder="Write your post here..."
+        >{{ $request->old('content') }}</textarea>
     </section>
     <section class="form-group">
         <button type="submit" class="btn btn-primary float-right @error('any') disabled @enderror">Create Post</button>

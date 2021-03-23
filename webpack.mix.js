@@ -17,3 +17,5 @@ mix.js('resources/js/app.js', 'public/js')
     .sass('resources/sass/global.scss', 'public/css')
     .sass('resources/sass/form.scss', 'public/css')
 ;
+
+mix.js('resources/js/modal.js', 'public/js')

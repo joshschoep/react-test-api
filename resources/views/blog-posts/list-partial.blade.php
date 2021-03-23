@@ -6,11 +6,11 @@
             <small class="card-subtitle text-muted">
                 Created by 
                 <a href="/users/{{ $post->owner_id }}">
-                    {{ $post->owner_name ?: $post->owner_id ?: "Unknown" }}
+                    {{ $post->owner->name ?: $post->owner_id ?: "Unknown" }}
                 </a>
                 {{ $post->updated_at->diffForHumans() }}
             </small>
-            <p class="card-text">{{ $post->lead }}...</p>
+            <p class="card-text">{{ $post->lead }}</p>
             <a href="/posts/{{ $post->id }}" class="btn btn-primary">View</a>
         </div>
     </article>
