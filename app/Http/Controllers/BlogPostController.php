@@ -15,30 +15,15 @@ class BlogPostController extends Controller
         'content' => ['required'],
     ];
 
-
-    public function root()
-    {
-        if(Auth::check()){
-            return redirect('recent');
-        }else{
-            return view('welcome');
-        }
-    }
-
     public function index()
     {
-        $posts = BlogPost::orderByDesc('updated_at')->paginate(15);
-        return view('blog-posts.index', compact('posts'));
+        $posts = BlogPost::with('owner')->orderByDesc('updated_at')->orderByDesc('created_at')->paginate(15);
+        return json_encode($posts);
     }
 
-    public function show(Request $request, BlogPost $post)
+    public function show(BlogPost $post)
     {
-        return view('blog-posts.show', compact('request', 'post'));
-    }
-
-    public function create(Request $request)
-    {
-        return view('blog-posts.create', compact('request'));
+        return json_encode($post);
     }
 
     public function store(Request $request)
@@ -47,33 +32,25 @@ class BlogPostController extends Controller
         $validated['owner_id'] = Auth::id();
         $validated['lead'] = Str::limit($validated['content'], 200, $end='...');
         $new_post = BlogPost::create($validated);
-        return redirect('/posts/' . $new_post->id);
-    }
-
-    public function edit(Request $request, BlogPost $post)
-    {
-        if(!Gate::allows('modify-content', $post)) {
-            return response()->view('no-permissions', [], 403);
-        }
-        return view('blog-posts.edit', compact('post', 'request'));
+        return response()->json_encode($new_post, 200);
     }
 
     public function update(Request $request, BlogPost $post)
     {
         if(!Gate::allows('modify-content', $post)) {
-            return response()->view('no-permissions', [], 403);
+            return response()->json(null, 403);
         }
         $validated = $request->validate(BlogPostController::$POST_FIELD_VALIDATIONS);
         $validated['lead'] = Str::limit($validated['content'], 200, $end='...');
         $post->update($validated);
-        return redirect('/posts/' . $post->id);
+        return response()->json_encode($post, 200);
     }
 
     public function destroy(BlogPost $post){
         if(!Gate::allows('modify-content', $post)) {
-            return response()->view('no-permissions', [], 403);
+            return response()->json(null, 403);
         }
         $post->delete();
-        return redirect('/recent');
+        return response()->json(null, 200);
     }
 }

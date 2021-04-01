@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
 use App\Models\Comment;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -26,9 +25,8 @@ class CommentController extends Controller
 
         $validated['owner_id'] = Auth::id();
         $validated['post_id'] = $post->id;
-        Comment::create($validated);
-
-        return redirect('/posts/' . $post->id);
+        $new_comment = Comment::create($validated);
+        return response()->json_encode($new_comment, 200);
     }
 
     /**
@@ -37,20 +35,9 @@ class CommentController extends Controller
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, Comment $comment)
+    public function show(Comment $comment)
     {
-        return view('comments.show', compact('request', 'comment'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Comment  $comment
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Request $request, Comment $comment)
-    {
-        return view('comments.edit', compact('request', 'comment'));
+        return response()->json(null, 403);
     }
 
     /**
@@ -60,14 +47,14 @@ class CommentController extends Controller
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Comment $comment)
+    public function update(Comment $comment)
     {
         if(!Gate::allows('modify-content', $comment)){
-            return response()->view('no-permissions', [], 403);
+            return response()->json(null, 403);
         }
         $validated = $request->validate(['content' => 'required']);
         $comment->update($validated);
-        return redirect($request['redirect'] ?: '/comments/' . $comment->id);
+        return response()->json($comment, 200);
     }
 
     /**
@@ -79,9 +66,9 @@ class CommentController extends Controller
     public function destroy(Request $request, Comment $comment)
     {
         if(!Gate::allows('modify-content', $post)){
-            return response()->view('no-permissions', [], 403);
+            return response()->json(null, 403);
         }
         $comment->delete();
-        return redirect($request['redirect'] ?: '/');
+        return response()->json(null, 200);
     }
 }

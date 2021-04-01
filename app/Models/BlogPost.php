@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class BlogPost extends Model
 {
     use HasFactory;
+    
+    protected $casts = [
+        'created_at' => 'timestamp',
+        'updated_at' => 'timestamp'
+    ];
 
     protected $guarded = array('id', 'created_at', 'updated_at');
 
