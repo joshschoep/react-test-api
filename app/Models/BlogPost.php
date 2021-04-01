@@ -18,8 +18,10 @@ class BlogPost extends Model
 
     protected $fillable = array('title', 'lead', 'content', 'owner_id');
 
+    protected $with = array('owner');
+
     public function comments() {
-        return $this->hasMany(Comment::class, 'post_id');
+        return $this->hasMany(Comment::class, 'post_id')->orderByDesc('created_at');
     }
 
     public function owner() {

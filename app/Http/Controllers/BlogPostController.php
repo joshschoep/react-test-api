@@ -17,13 +17,13 @@ class BlogPostController extends Controller
 
     public function index()
     {
-        $posts = BlogPost::with('owner')->orderByDesc('updated_at')->orderByDesc('created_at')->paginate(15);
+        $posts = BlogPost::orderByDesc('created_at')->paginate(15);
         return json_encode($posts);
     }
 
-    public function show(BlogPost $post)
+    public function show(int $id)
     {
-        return json_encode($post);
+        return json_encode(BlogPost::with('comments')->findOrFail($id));
     }
 
     public function store(Request $request)
